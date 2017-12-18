@@ -14,7 +14,7 @@ public class Funciones {
 	boolean responsive;
 	String cssRecortado;
 	
-	public boolean comprobarAnalytics(String html){
+	public  boolean comprobarAnalytics(String html){
 		boolean encontrado =false;
 		if(!(html.equals("analytics.js")) || !(html.equals("ga.js")) || !(html.equals("googletagmanager"))){
 			encontrado = true;
@@ -22,7 +22,7 @@ public class Funciones {
 		return encontrado;
 	}
 	
-	public boolean comprobarResponsive(String html, URL url){
+	public boolean comprobarResponsive(String html){
 		boolean responsive = false;
 		if(html.equals("bootstrap.min.css")){
 			responsive=true;
