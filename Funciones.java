@@ -4,14 +4,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.regex.*;
 
+import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
 
 public class Funciones {
 	
 	String css ;
-	boolean responsive;
+	boolean responsive = false;
 	String cssRecortado;
 	
 	public  boolean comprobarAnalytics(String html){
@@ -22,69 +22,81 @@ public class Funciones {
 		return encontrado;
 	}
 	
-	public boolean comprobarResponsive(String html){
-		boolean responsive = false;
-		if(html.equals("bootstrap.min.css")){
-			responsive=true;
+	public boolean comprobarResponsive(String html, String url) {
+		//Escribo las forma tipica de meter boostrap, si el dueño de la pagina lo ha cambiado de nombre debere comprobarlo.
+		if (html.contains("bootstrap.min.css")) {
+			responsive = true;
 			return responsive;
 		}
-		//Pattern p = Pattern.compile("/href=(.*)\\.css\\??[a-zA-Z0-9_ .&#=;]*/", html);
-		//Matcher m = p.matcher(css);
+
+		Pattern pat = Pattern.compile("href=(.*)\\.css\\??[a-zA-Z0-9_ .&#=;]*");
+		Matcher css = pat.matcher(html);
 		
-		 Pattern pat = Pattern.compile("/href=(.*)\\.css\\??[a-zA-Z0-9_ .&#=;]*/");
-	     Matcher css = pat.matcher(html);
-		
-		int i = 0;
-		//Recorro todos los css que he encontrado
-		while((i< css.groupCount()) && (responsive==false)){
-			cssRecortado = css.group(i).substring(6);
-			//Si me da un codigo 200 es que existe y debo de comprobarlo.
-			try {
-				if(comprobarCss(cssRecortado) == "200"){
-					//Guardo el codigo HTML del .CSS para comprobar mendiante Exp Regulares si tiene mediaQuerys 
-					String codigoCss = fileToString(cssRecortado);
-					
-					Pattern patMediaQuery = Pattern.compile("/@media\\??[a-zA-Z0-9_ .&#=;]*\\((min|max)\\-width/"); //Esta expresion regular encuentra los media e ignora los print
-				    Matcher matMediaQuery = patMediaQuery.matcher(codigoCss);			
-						if(!matMediaQuery.find()){
+		System.out.println("URL: "+ url + " ");
+//		while (css.find()) {
+//		  System.out.print("Start index: " + css.start());
+//          System.out.print(" End index: " + css.end() + " ");
+//          System.out.println(css.group());
+//		}
+		// Recorro todos los css que he encontrado
+		while ((responsive == false) && css.find()) {
+			
+				cssRecortado = css.group().substring(6);
+
+				// Comprobar que el .css tiene estructura de URL, porque a veces se usan rutas relativas
+				if (!cssRecortado.contains("http")) {					
+					cssRecortado = url + "/" + cssRecortado;	
+				}
+				//Para ver lo codigo css analizados 
+				System.out.println("Analizando: "+cssRecortado);
+				// Si me da un codigo 200 es que existe y debo de comprobarlo.
+				try {
+					if (comprobarCodigoRespuesta(cssRecortado).equals("200")) {
+						// Guardo el codigo HTML del .CSS para comprobar mendiante Exp Regulares si tiene mediaQuerys
+						String codigoCss = URLaString(cssRecortado);
+						
+						// Esta expresion regular  encuentra los  media  expresion ignora los print
+						Pattern patMediaQuery = Pattern.compile("@media\\??[a-zA-Z0-9_ .&#=;]*\\((min|max)\\-width"); 
+						
+						Matcher matMediaQuery = patMediaQuery.matcher(codigoCss);
+						if (!matMediaQuery.find()) {
 							responsive = false;
-						}
-						else{
+						} else {
 							responsive = true;
-						}			
-				}
-				else{
-					if(comprobarCss(cssRecortado) == "400"){
-						//No hacer nada, porque es un codigo 
-					}
-					else{
-						//Cualquier otro tipo que no sea 200
-						
-						//Guardo el codigo HTML del .CSS para comprobar mendiante Exp Regulares si tiene mediaQuerys 
-						String codigoCss = fileToString(cssRecortado);
-						
-						Pattern patMediaQuery = Pattern.compile("/@media\\??[a-zA-Z0-9_ .&#=;]*\\((min|max)\\-width/"); //Esta expresion regular encuentra los media e ignora los print
-					    Matcher matMediaQuery = patMediaQuery.matcher(codigoCss);			
-							if(!matMediaQuery.find()){
+							return responsive;
+						}
+					} else {
+						if (comprobarCodigoRespuesta(cssRecortado).equals("400") || comprobarCodigoRespuesta(cssRecortado).equals("404") || comprobarCodigoRespuesta(cssRecortado).equals("403") ) {
+							// No hacer nada, porque es un codigo 400
+						} else {
+							// Cualquier otro tipo que no sea 200
+
+							// Guardo el codigo HTML del .CSS para comprobar
+							// mendiante Exp Regulares si tiene mediaQuerys
+							String codigoCss = URLaString(cssRecortado);
+							// Esta expresion regular  encuentra los  media  expresion ignora los print
+							Pattern patMediaQuery = Pattern.compile("@media\\??[a-zA-Z0-9_ .&#=;]*\\((min|max)\\-width"); 	
+							Matcher matMediaQuery = patMediaQuery.matcher(codigoCss);
+							if (!matMediaQuery.find()) {
 								responsive = false;
-							}
-							else{
+							} else {
 								responsive = true;
+								return responsive;
 							}
+						}
 					}
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			i++;
+			
 		}
 		return responsive;
 	}
 	
 	//Funcion que devuelve el codigo de la cabecera.
-	public String comprobarCss(String url) throws IOException{
+	public String comprobarCodigoRespuesta(String url) throws IOException{
 		URL u = new URL ( url);
-		HttpURLConnection huc =  ( HttpURLConnection )u.openConnection (); 
+		HttpURLConnection huc =  ( HttpURLConnection )u.openConnection(); 
 		huc.setRequestMethod ("HEAD"); 
 		huc.connect () ; 
 		int codigo = huc.getResponseCode() ;
@@ -99,35 +111,23 @@ public class Funciones {
 		StringBuilder builder = new StringBuilder();
 
 		link = new URL(url);
+		
 		BufferedReader in = new BufferedReader(new InputStreamReader(link.openStream()));
 
 		String linea;
 
 		while ((linea = in.readLine()) != null) {
-			builder.append(linea);
+			builder.append(linea + "\r\n");
 		}
 
 		in.close();
 
 		String html = builder.toString();
+
 		return html;
 
 	}
 	
-	//Creo que no se usa
-		public String fileToString(String filename) throws IOException
-		{
-		    BufferedReader reader = new BufferedReader(new FileReader(filename));
-		    StringBuilder builder = new StringBuilder();
-		    String line;    
-
-		    while((line = reader.readLine()) != null)
-		    {
-		        builder.append(line);
-		    }
-
-		    reader.close();
-		    return builder.toString();
-		}
+	
 
 }
