@@ -21,7 +21,7 @@ public class Principal {
 		int contadorPag = 0;
 
 		File archivoAprocesar = new File(archivo);
-		// Si existe sino error
+		// Si existe si no error
 		if (archivoAprocesar.exists()) {
 
 			BufferedReader br = null;
