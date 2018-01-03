@@ -1,5 +1,4 @@
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -23,7 +22,7 @@ public class Funciones {
 	}
 	
 	public boolean comprobarResponsive(String html, String url) {
-		//Escribo las forma tipica de meter boostrap, si el dueño de la pagina lo ha cambiado de nombre debere comprobarlo.
+		//Escribo las forma tipica de meter boostrap, si el due–o de la pagina lo ha cambiado de nombre debere comprobarlo.
 		if (html.contains("bootstrap.min.css")) {
 			responsive = true;
 			return responsive;
@@ -105,29 +104,33 @@ public class Funciones {
 	
 	
 	//Pre: La URL debe de existir 
-	public static String URLaString(String url) throws IOException {
-
+	public static String URLaString(String url){
 		URL link;
-		StringBuilder builder = new StringBuilder();
-
-		link = new URL(url);
-		
-		BufferedReader in = new BufferedReader(new InputStreamReader(link.openStream()));
-
+		StringBuilder builder;
 		String linea;
-
-		while ((linea = in.readLine()) != null) {
-			builder.append(linea + "\r\n");
+		BufferedReader in = null;
+		String html = null;
+		try{
+			builder = new StringBuilder();
+			link = new URL(url);
+			in = new BufferedReader(new InputStreamReader(link.openStream()));
+			
+			while ((linea = in.readLine()) != null) {
+				builder.append(linea + "\r\n");
+			}
+			
+			html = builder.toString();
+			
+		} catch (IOException e){
+			e.printStackTrace();
+		} finally {
+			try {
+				in.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-
-		in.close();
-
-		String html = builder.toString();
-
 		return html;
-
 	}
-	
-	
-
 }

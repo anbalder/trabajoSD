@@ -6,7 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-//Para ejecutar este programa hacer tener JRE en vez de la JDK
+//Para ejecutar este programa hace falta tener JRE en vez de la JDK
 public class Principal {
 
 	public static void main(String[] args) {
