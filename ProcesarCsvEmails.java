@@ -32,13 +32,13 @@ public class ProcesarCsvEmails implements Callable<String>{
 				//Cambio la url a donde apunta la redireccion
 				
 			url = conn.getHeaderField("Location");
-			System.out.println("AVISO: La pagina "+obj.toString()+" ha sido redirigida a: "+ url);
-			System.out.println("------------------------------------");
+			System.out.println("AVISO: La pagina "+obj.toString()+" ha sido redirigida a: "+ url+ "\n"+ "------------------------------------");
+		
 		}
 	
 		String html = Funciones.URLaString(url);	
 		//Funciones del html
-		email = fun.buscarEmail(html);
+		email = fun.buscarEmail(html,url);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

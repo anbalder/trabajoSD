@@ -31,8 +31,8 @@ public class ProcesarCsv implements Callable<List<Boolean>>{
 			//Cambio la url a donde apunta la redireccion
 			
 				url = conn.getHeaderField("Location");
-			System.out.println("AVISO: La pagina "+obj.toString()+" ha sido redirigida a: "+ url);
-			System.out.println("------------------------------------");
+			System.out.println("AVISO: La pagina "+obj.toString()+" ha sido redirigida a: "+ url+ "\n"+ "------------------------------------");
+		
 		}
 
 		
